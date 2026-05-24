@@ -211,7 +211,8 @@
     }
 
     .modal input[type="password"],
-    .modal select {
+    .modal select,
+    .modal textarea {
       width: 100%;
       padding: 10px 12px;
       border: 1px solid #4d4d4f;
@@ -224,7 +225,8 @@
     }
 
     .modal input[type="password"]:focus,
-    .modal select:focus {
+    .modal select:focus,
+    .modal textarea:focus {
       border-color: #8e8ea0;
     }
 
@@ -312,6 +314,8 @@
       const [tempApiKey, setTempApiKey] = useState('');
       const [model, setModel] = useState('gpt-4o-mini');
       const [tempModel, setTempModel] = useState('gpt-4o-mini');
+      const [systemPrompt, setSystemPrompt] = useState('');
+      const [tempSystemPrompt, setTempSystemPrompt] = useState('');
       const [error, setError] = useState('');
       const chatEndRef = useRef(null);
       const textareaRef = useRef(null);
@@ -329,12 +333,14 @@
       const openSettings = () => {
         setTempApiKey(apiKey);
         setTempModel(model);
+        setTempSystemPrompt(systemPrompt);
         setShowSettings(true);
       };
 
       const saveSettings = () => {
         setApiKey(tempApiKey);
         setModel(tempModel);
+        setSystemPrompt(tempSystemPrompt);
         setShowSettings(false);
       };
 
@@ -367,7 +373,10 @@
             },
             body: JSON.stringify({
               model: model,
-              messages: newMessages.map(m => ({ role: m.role, content: m.content })),
+              messages: [
+                ...(systemPrompt ? [{ role: 'system', content: systemPrompt }] : []),
+                ...newMessages.map(m => ({ role: m.role, content: m.content })),
+              ],
             }),
           });
 
@@ -481,6 +490,15 @@
                   <option value="gpt-4-turbo">GPT-4 Turbo</option>
                   <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
                 </select>
+
+                <label>システムプロンプト</label>
+                <textarea
+                  rows="4"
+                  placeholder="例: あなたは親切な日本語アシスタントです。"
+                  value={tempSystemPrompt}
+                  onChange={(e) => setTempSystemPrompt(e.target.value)}
+                  style={{ resize: 'vertical', fontFamily: 'inherit' }}
+                />
 
                 <div className="modal-actions">
                   <button className="btn-cancel" onClick={() => setShowSettings(false)}>キャンセル</button>
